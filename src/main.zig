@@ -77,6 +77,7 @@ fn generateSong(allocator: mem.Allocator, name: []const u8, src: fs.Dir, site: f
         credit: ?struct {
             original: ?Credit = null,
             samples: ?[]Credit = null,
+            ib: ?[]Credit = null,
         } = null,
         description: [][]u8,
         links: struct {
@@ -157,6 +158,55 @@ fn generateSong(allocator: mem.Allocator, name: []const u8, src: fs.Dir, site: f
         \\            </div>
         \\
     );
+    if (info_json.value.credit) |credit| {
+        if (credit.original) |original| {
+            try index.writeAll(
+                \\            <p class="song-credit">original by <a href="
+            );
+            try index.writeAll(original.link);
+            try index.writeAll(
+                \\">
+            );
+            try index.writeAll(original.text);
+            try index.writeAll(
+                \\</a>!</p>
+                \\
+            );
+        }
+
+        if (credit.samples) |samples| {
+            try index.writeAll(
+                \\            <p class="song-credit">with samples from 
+            );
+
+            for (samples, 0..) |sample, i| {
+                if (i != 0) {
+                    if (i == samples.len - 1) {
+                        try index.writeAll(" and ");
+                    } else {
+                        try index.writeAll(", ");
+                    }
+                }
+                try index.writeAll(
+                    \\<a href="
+                );
+                try index.writeAll(sample.link);
+                try index.writeAll(
+                    \\">
+                );
+                try index.writeAll(sample.text);
+                try index.writeAll(
+                    \\</a>
+                );
+            }
+
+            try index.writeAll(
+                \\!</p>
+                \\
+            );
+        }
+    }
+
     for (description) |line| {
         try index.writeAll(
             \\            <p class="song-desc">

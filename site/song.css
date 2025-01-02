@@ -57,6 +57,18 @@
 	margin-bottom: -0.5em;
 }
 
+.song-credit {
+	font-size: 1em;
+	min-height: 1em;
+	margin-top: 0.25em;
+	font-style: italic;
+	color: rgb(82, 127, 102);
+}
+
+.song-credit a {
+	color: rgb(94, 144, 112);
+}
+
 .links {
 	font-size: 1em;
     text-align: right;
