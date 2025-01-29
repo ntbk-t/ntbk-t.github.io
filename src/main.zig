@@ -24,6 +24,11 @@ pub fn main() !void {
         try cwd.createFile("site/index.html", .{ .exclusive = true }),
     );
 
+    try copyFile(
+        try cwd.openFile("res/404.html", .{}),
+        try cwd.createFile("site/404.html", .{ .exclusive = true }),
+    );
+
     try copyDirContents(
         try cwd.openDir("res/images", .{ .iterate = true }),
         site,
