@@ -56,47 +56,89 @@ fn copyDirContents(from: fs.Dir, to: fs.Dir) !void {
 }
 
 fn generateSongs(allocator: mem.Allocator, songs: fs.Dir, site: fs.Dir) !void {
+    try site.makeDir("music");
+    const music = try site.createFile("music/index.html", .{});
+
+    try music.writeAll(
+        \\<!doctype HTML>
+        \\
+        \\<html>
+        \\    <head>
+        \\        <title>music!</title>
+        \\        <meta charset="UTF-8">
+        \\        <meta name="description" content="all of my music! in (SOME ORDER IDK LOL)">
+        \\        <meta name="keywords" content="notebook, ntbk, music">
+        \\        <meta name="author" content="notebook"/>
+        \\        <link rel="stylesheet" href="../song.css"/>
+    );
+
     var iter = songs.iterate();
     while (try iter.next()) |entry| {
-        try generateSong(
-            allocator,
-            entry.name,
-            try songs.openDir(entry.name, .{}),
-            site,
-        );
+        var src = try songs.openDir(entry.name, .{});
+        defer src.close();
+
+        const song = try ParsedSong.from(allocator, entry.name, src);
+        defer song.deinit();
+
+        try generateSong(song, src, site);
+
+        const icon = try mem.concat(allocator, u8, &.{ "../", song.info.value.links.ntbk, "/icon.png" });
+        defer allocator.free(icon);
+
+        try writeSongInto(music.writer(), icon, song);
     }
+
+    try music.writeAll(
+        \\    </head>
+        \\</html>
+    );
 }
 
-fn generateSong(allocator: mem.Allocator, name: []const u8, src: fs.Dir, site: fs.Dir) !void {
+const SongInfo = struct {
     const Credit = struct {
         text: []u8,
         link: []u8,
     };
 
-    const Info = struct {
-        credit: ?struct {
-            original: ?Credit = null,
-            samples: ?[]Credit = null,
-            ib: ?[]Credit = null,
-        } = null,
-        description: [][]u8,
-        links: struct {
-            ntbk: []u8,
-            soundcloud: []u8,
-            ultrabox: []u8,
-        },
-    };
+    credit: ?struct {
+        original: ?Credit = null,
+        samples: ?[]Credit = null,
+        ib: ?[]Credit = null,
+    } = null,
+    description: [][]u8,
+    links: struct {
+        ntbk: []u8,
+        soundcloud: []u8,
+        ultrabox: []u8,
+    },
+};
 
-    const info = try src.openFile("info.json", .{});
-    defer info.close();
+const ParsedSong = struct {
+    name: []const u8,
+    info: json.Parsed(SongInfo),
 
-    var info_reader = json.reader(allocator, info.reader());
-    defer info_reader.deinit();
-    const info_json = try json.parseFromTokenSource(Info, allocator, &info_reader, .{});
-    defer info_json.deinit();
+    fn from(allocator: mem.Allocator, name: []const u8, src: fs.Dir) !ParsedSong {
+        const info = try src.openFile("info.json", .{});
+        defer info.close();
 
-    try site.makeDir(info_json.value.links.ntbk);
-    const dest = try site.openDir(info_json.value.links.ntbk, .{});
+        var info_reader = json.reader(allocator, info.reader());
+        defer info_reader.deinit();
+        const info_json = try json.parseFromTokenSource(SongInfo, allocator, &info_reader, .{});
+
+        return .{
+            .name = name,
+            .info = info_json,
+        };
+    }
+
+    fn deinit(self: ParsedSong) void {
+        self.info.deinit();
+    }
+};
+
+fn generateSong(song: ParsedSong, src: fs.Dir, site: fs.Dir) !void {
+    try site.makeDir(song.info.value.links.ntbk);
+    const dest = try site.openDir(song.info.value.links.ntbk, .{});
 
     try copyFile(try src.openFile("icon.png", .{}), try dest.createFile("icon.png", .{}));
 
@@ -109,7 +151,7 @@ fn generateSong(allocator: mem.Allocator, name: []const u8, src: fs.Dir, site: f
         \\        <title>
     );
 
-    try index.writeAll(name);
+    try index.writeAll(song.name);
 
     try index.writeAll(
         \\</title>
@@ -118,10 +160,10 @@ fn generateSong(allocator: mem.Allocator, name: []const u8, src: fs.Dir, site: f
         \\        <meta name="description" content="
     );
 
-    const description = info_json.value.description;
+    const description = song.info.value.description;
     if (description.len > 0) {
         try index.writeAll(description[0]);
-        for (info_json.value.description[1..]) |line| {
+        for (song.info.value.description[1..]) |line| {
             try index.writeAll("\n");
             try index.writeAll(line);
         }
@@ -132,7 +174,7 @@ fn generateSong(allocator: mem.Allocator, name: []const u8, src: fs.Dir, site: f
         \\        <meta name="keywords" content="notebook, ntbk, 
     );
 
-    try index.writeAll(name);
+    try index.writeAll(song.name);
 
     try index.writeAll(
         \\"/>
@@ -140,98 +182,114 @@ fn generateSong(allocator: mem.Allocator, name: []const u8, src: fs.Dir, site: f
         \\        <link rel="stylesheet" href="../song.css"/>
         \\    </head>
         \\    <body>
+        \\
+    );
+
+    try writeSongInto(index.writer(), "icon.png", song);
+
+    try index.writeAll(
+        \\
+        \\    </body>
+        \\</html>
+    );
+}
+
+fn writeSongInto(writer: fs.File.Writer, icon: []const u8, song: ParsedSong) !void {
+    try writer.writeAll(
         \\        <div class="box">
         \\            <div class="song-header">
-        \\                <img class="song-icon" src="icon.png"/>
+        \\                <img class="song-icon" src="
+    );
+    try writer.writeAll(icon);
+    try writer.writeAll(
+        \\"/>
         \\                <div class="song-player">
         \\                    <h1 class="song-title">
     );
-    try index.writeAll(name);
-    try index.writeAll(
+    try writer.writeAll(song.name);
+    try writer.writeAll(
         \\</h1>
         \\                    <iframe class="song-embed" src="https://ultraabox.github.io/player/#song=u
     );
-    try index.writeAll(info_json.value.links.ultrabox);
-    try index.writeAll(
+    try writer.writeAll(song.info.value.links.ultrabox);
+    try writer.writeAll(
         \\"></iframe>
         \\                </div>
         \\            </div>
         \\
     );
-    if (info_json.value.credit) |credit| {
+    if (song.info.value.credit) |credit| {
         if (credit.original) |original| {
-            try index.writeAll(
+            try writer.writeAll(
                 \\            <p class="song-credit">original by <a href="
             );
-            try index.writeAll(original.link);
-            try index.writeAll(
+            try writer.writeAll(original.link);
+            try writer.writeAll(
                 \\">
             );
-            try index.writeAll(original.text);
-            try index.writeAll(
+            try writer.writeAll(original.text);
+            try writer.writeAll(
                 \\</a>!</p>
                 \\
             );
         }
 
         if (credit.samples) |samples| {
-            try index.writeAll(
+            try writer.writeAll(
                 \\            <p class="song-credit">with samples from 
             );
 
             for (samples, 0..) |sample, i| {
                 if (i != 0) {
                     if (i == samples.len - 1) {
-                        try index.writeAll(" and ");
+                        try writer.writeAll(" and ");
                     } else {
-                        try index.writeAll(", ");
+                        try writer.writeAll(", ");
                     }
                 }
-                try index.writeAll(
+                try writer.writeAll(
                     \\<a href="
                 );
-                try index.writeAll(sample.link);
-                try index.writeAll(
+                try writer.writeAll(sample.link);
+                try writer.writeAll(
                     \\">
                 );
-                try index.writeAll(sample.text);
-                try index.writeAll(
+                try writer.writeAll(sample.text);
+                try writer.writeAll(
                     \\</a>
                 );
             }
 
-            try index.writeAll(
+            try writer.writeAll(
                 \\!</p>
                 \\
             );
         }
     }
 
-    for (description) |line| {
-        try index.writeAll(
+    for (song.info.value.description) |line| {
+        try writer.writeAll(
             \\            <p class="song-desc">
         );
-        try index.writeAll(line);
-        try index.writeAll("</p>\n");
+        try writer.writeAll(line);
+        try writer.writeAll("</p>\n");
     }
 
-    try index.writeAll(
+    try writer.writeAll(
         \\            <p class="links">
         \\                <a href="https://soundcloud.com/user-505918075/
     );
-    try index.writeAll(info_json.value.links.soundcloud);
+    try writer.writeAll(song.info.value.links.soundcloud);
 
-    try index.writeAll(
+    try writer.writeAll(
         \\">soundcloud</a> |
         \\                <a href="https://ultraabox.github.io/#u
     );
-    try index.writeAll(info_json.value.links.ultrabox);
+    try writer.writeAll(song.info.value.links.ultrabox);
 
-    try index.writeAll(
+    try writer.writeAll(
         \\">ultrabox</a>
         \\            </p>
         \\        </div>
-        \\    </body>
-        \\</html>
     );
 }
