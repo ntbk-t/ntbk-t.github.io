@@ -1,0 +1,70 @@
+p, a {
+	font-family: "Noto Sans Light", sans-serif;
+	text-align: center;
+	width: 100%;
+	display: inline-block;
+	color: white;
+	opacity: 50%;
+}
+
+div {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+
+p {
+	font-size: 250%;
+}
+
+a {
+	font-size: 150%;
+}
+
+.bg {
+	position: absolute;
+	background: url("ominous_clouds.png") repeat;
+	background-position: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+#bg0 {
+	background-size: 8192px;
+	animation: slide0 480s linear infinite;
+}
+
+#bg1 {
+	background-size: 4096px;
+	opacity: 25%;
+	animation: slide0 240s linear infinite;
+}
+#bg2 {
+	background-size: 2048px;
+	opacity: 25%;
+	animation: slide0 120s linear infinite;
+}
+#bg3 {
+	background-size: 1024px;
+	opacity: 25%;
+	animation: slide0 60s linear infinite;
+}
+
+@keyframes slide0 {
+	0% { background-position: 0px 0px; }
+	100% { background-position: 8192px 8192px; }
+}
+@keyframes slide1 {
+	0% { background-position: 0px 0px; }
+	100% { background-position: 4096px 4096px; }
+}
+@keyframes slide2 {
+	0% { background-position: 0px 0px; }
+	100% { background-position: 2048px 2048px; }
+}
+@keyframes slide3 {
+	0% { background-position: 0px 0px; }
+	100% { background-position: 1024px 1024px; }
+}
