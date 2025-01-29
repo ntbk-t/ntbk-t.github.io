@@ -90,7 +90,9 @@ fn generateSongs(allocator: mem.Allocator, songs: fs.Dir, site: fs.Dir) !void {
         const icon = try mem.concat(allocator, u8, &.{ "../", song.info.value.links.ntbk, "/icon.png" });
         defer allocator.free(icon);
 
-        try writeSongInto(music.writer(), icon, song);
+        if (!song.info.value.secret) {
+            try writeSongInto(music.writer(), icon, song);
+        }
     }
 
     try music.writeAll(
@@ -113,9 +115,10 @@ const SongInfo = struct {
     description: [][]u8,
     links: struct {
         ntbk: []u8,
-        soundcloud: []u8,
+        soundcloud: ?[]u8 = null,
         ultrabox: []u8,
     },
+    secret: bool = false,
 };
 
 const ParsedSong = struct {
@@ -184,7 +187,17 @@ fn generateSong(song: ParsedSong, src: fs.Dir, site: fs.Dir) !void {
     try index.writeAll(
         \\"/>
         \\        <meta name="author" content="notebook"/>
-        \\        <link rel="stylesheet" href="../song.css"/>
+        \\        <link rel="stylesheet" href="
+    );
+
+    if (song.info.value.secret) {
+        try index.writeAll("../secret_song.css");
+    } else {
+        try index.writeAll("../song.css");
+    }
+
+    try index.writeAll(
+        \\"/>
         \\    </head>
         \\    <body>
         \\
@@ -282,12 +295,20 @@ fn writeSongInto(writer: fs.File.Writer, icon: []const u8, song: ParsedSong) !vo
 
     try writer.writeAll(
         \\            <p class="links">
-        \\                <a href="https://soundcloud.com/user-505918075/
     );
-    try writer.writeAll(song.info.value.links.soundcloud);
+
+    if (song.info.value.links.soundcloud) |link| {
+        try writer.writeAll(
+            \\                <a href="https://soundcloud.com/user-505918075/
+        );
+        try writer.writeAll(link);
+
+        try writer.writeAll(
+            \\">soundcloud</a> |
+        );
+    }
 
     try writer.writeAll(
-        \\">soundcloud</a> |
         \\                <a href="https://ultraabox.github.io/#u
     );
     try writer.writeAll(song.info.value.links.ultrabox);
