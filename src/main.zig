@@ -75,6 +75,7 @@ fn generateSongs(allocator: mem.Allocator, songs: fs.Dir, site: fs.Dir) !void {
         \\        <meta name="keywords" content="notebook, ntbk, music">
         \\        <meta name="author" content="notebook"/>
         \\        <link rel="stylesheet" href="../song.css"/>
+        \\        <link rel="icon" type="image/png" href="../default.ico"/>
     );
 
     var iter = songs.iterate();
