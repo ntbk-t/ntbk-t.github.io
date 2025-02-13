@@ -76,6 +76,8 @@ fn generateSongs(allocator: mem.Allocator, songs: fs.Dir, site: fs.Dir) !void {
         \\        <meta name="author" content="notebook"/>
         \\        <link rel="stylesheet" href="../song.css"/>
         \\        <link rel="icon" type="image/png" href="../default.ico"/>
+        \\    </head>
+        \\    <body>
     );
 
     var iter = songs.iterate();
@@ -96,8 +98,9 @@ fn generateSongs(allocator: mem.Allocator, songs: fs.Dir, site: fs.Dir) !void {
         }
     }
 
+    try writeUltraboxDisclaimer(music.writer());
     try music.writeAll(
-        \\    </head>
+        \\    </body>
         \\</html>
     );
 }
@@ -205,6 +208,7 @@ fn generateSong(song: ParsedSong, src: fs.Dir, site: fs.Dir) !void {
     );
 
     try writeSongInto(index.writer(), "icon.png", song);
+    try writeUltraboxDisclaimer(index.writer());
 
     try index.writeAll(
         \\
@@ -318,5 +322,15 @@ fn writeSongInto(writer: fs.File.Writer, icon: []const u8, song: ParsedSong) !vo
         \\">ultrabox</a>
         \\            </p>
         \\        </div>
+    );
+}
+
+fn writeUltraboxDisclaimer(writer: fs.File.Writer) !void {
+    try writer.writeAll(
+        \\<p class="centered whisper">
+        \\    <a class="whisper" href="https://bsky.app/profile/filegarden.com/post/3lhvw2zv5is23">filegarden is currently down!</a>
+        \\    some ultrabox links may not work at the moment...
+        \\    (i am going to strategically place legos around John GoDaddy's home)
+        \\</p>
     );
 }

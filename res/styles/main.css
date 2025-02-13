@@ -1,4 +1,6 @@
 body {
+    margin: 0;
+    padding: 0;
     background-color: rgb(22, 30, 28);
 }
 
@@ -45,6 +47,21 @@ a {
     padding: 12px;
 
     margin: 0 auto;
+}
+
+#navbar {
+    position: sticky;
+    left: 0;
+    top: 0;
+    background-color: rgb(30, 48, 44);
+    width: 100%;
+    padding: 0.25em;
+}
+
+#navbar a {
+    margin-left: 1em;
+    top: 50%;
+    font-size: 1em;
 }
 
 #profile-picture {
