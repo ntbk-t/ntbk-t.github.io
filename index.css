@@ -1,6 +1,7 @@
 body {
     background-color: #1a4f43;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
 }
 
 #fog {
