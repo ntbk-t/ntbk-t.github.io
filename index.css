@@ -1,20 +1,6 @@
 body {
     background-color: #1a4f43;
-}
-
-#avatar-container {
-    /* this size is a best-guess, will be updated by
-    javascript! (unless javascript is disabled :p) */
-    width: 50vmin;
-
-    /* place the sprite at the bottom-left of the page */
-    position: absolute;
-    left: 0%;
-    bottom: 0%;
-
-    /* used to cut off the excess frames of the
-    spritesheet we are displaying */
-    overflow: hidden;
+    min-height: 100vh;
 }
 
 #fog {
@@ -56,18 +42,23 @@ body {
 }
 
 #avatar {
+    /* this size is a best-guess, will be updated by
+    javascript! (unless javascript is disabled :p) */
+    width: 50vmin;
+    height: 50vmin;
+
+    /* place the sprite at the bottom-left of the page */
+    position: absolute;
+    left: 0%;
+    bottom: 0%;
+
     /* nearest neighbor scaling! useful for
     displaying pixel art without the stupid
     browser blurring it */
     image-rendering: pixelated;
 
-    position: relative;
-
-    /* width is set to 200% because there are TWO
-    frames in the spritesheet! (only one will be
-    visible at a time) */
-    width: 200%;
-    height: 100%;
+    background-image: url("avatar.png");
+    background-size: cover;
 
     /* swap between frames */
     animation-name: avatar;
@@ -126,9 +117,9 @@ p {
 }
 
 @keyframes avatar {
-    0%   { left:    0%; }
-    50%  { left: -100%; }
-    100% { left:    0%; }
+    0%   { background-position: 0, 0; }
+    50%  { background-position: -100%, 0; }
+    100% { background-position: 0, 0; }
 }
 
 @keyframes whatsup-a {
