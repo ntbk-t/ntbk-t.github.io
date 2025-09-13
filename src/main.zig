@@ -40,4 +40,5 @@ fn make404(assets: fs.Dir, site: fs.Dir) !void {
 
     try assets_404.copyFile("index.html", site, "404.html", .{});
     try assets_404.copyFile("ominous-fog.png", site_404, "ominous-fog.png", .{});
+    try assets_404.copyFile("empty.png", site_404, "empty.png", .{});
 }
