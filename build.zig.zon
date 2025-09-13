@@ -1,0 +1,7 @@
+.{
+    .name = .ntbk_site,
+    .version = "0.0.0",
+    .fingerprint = 0x10332369815f7905, // changing this has security and trust implications (lmao)
+    .minimum_zig_version = "0.16.0-dev.164+bc7955306",
+    .paths = .{ "build.zig", "build.zig.zon", "src" },
+}
