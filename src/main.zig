@@ -38,6 +38,6 @@ fn make404(assets: fs.Dir, site: fs.Dir) !void {
     var site_404 = try site.makeOpenPath("404", .{});
     defer site_404.close();
 
-    try assets_404.copyFile("index.html", site_404, "index.html", .{});
+    try assets_404.copyFile("index.html", site, "404.html", .{});
     try assets_404.copyFile("ominous-fog.png", site_404, "ominous-fog.png", .{});
 }
