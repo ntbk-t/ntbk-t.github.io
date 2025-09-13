@@ -1,0 +1,135 @@
+body {
+    background-color: #1a4f43;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#fog {
+    position: absolute;
+	background: url("../404/ominous-fog.png") repeat;
+    opacity: 50%;
+    background-size: 1024px;
+    image-rendering: pixelated;
+    left: 0%;
+    top: 0%;
+	background-position: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+
+    animation-name: fog;
+    animation-duration: 16s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+#grid {
+    position: absolute;
+	background: url("cool-grid.png") repeat;
+    background-size: 432px;
+    opacity: 25%;
+    image-rendering: pixelated;
+    left: 0%;
+    top: 0%;
+	background-position: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+
+    animation-name: grid;
+    animation-duration: 8s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+#avatar {
+    /* this size is a best-guess, will be updated by
+    javascript! (unless javascript is disabled :p) */
+    width: 50vmin;
+    height: 50vmin;
+
+    /* place the sprite at the bottom-left of the page */
+    position: absolute;
+    left: 0%;
+    bottom: 0%;
+
+    /* nearest neighbor scaling! useful for
+    displaying pixel art without the stupid
+    browser blurring it */
+    image-rendering: pixelated;
+
+    background-image: url("avatar.png");
+    background-size: cover;
+
+    /* swap between frames */
+    animation-name: avatar;
+    animation-duration: 1.5s;
+    animation-iteration-count: infinite;
+    animation-timing-function: step-start;
+}
+
+h1 {
+    /* handlee is the handwritten font preset for scratch,
+    so it holds a special place in my heart <3
+    (and comic sans is just,, awesome,,
+    the best font ever made ngl) */
+    font-family: "Handlee", "Comic Sans MS", cursive;
+
+    position: absolute;
+    right: 10%;
+    rotate: 5deg;
+    animation-duration: 1.5s;
+    animation-iteration-count: infinite;
+    animation-timing-function: step-start;
+}
+
+p {
+    color: white;
+    font-family: "Handlee", "Comic Sans MS", cursive;
+    position: absolute;
+    font-size: 1.5em;
+
+    width: 50vw;
+
+    right: 2.5vw;
+    bottom: 0%;
+}
+
+#whatsup-a {
+    opacity: 50%;
+    color: black;
+    font-size: 10.75vmin;
+    animation-name: whatsup-a;
+}
+#whatsup-b {
+    color: white;
+    font-size: 11vmin;
+    animation-name: whatsup-b;
+}
+
+@keyframes fog {
+	0% { background-position: 0px 0px; }
+	100% { background-position: 2048px 1024px; }
+}
+
+@keyframes grid {
+	0% { background-position: 0px 432px; }
+	100% { background-position: 432px 0px; }
+}
+
+@keyframes avatar {
+    0%   { background-position: 0, 0; }
+    50%  { background-position: -100%, 0; }
+    100% { background-position: 0, 0; }
+}
+
+@keyframes whatsup-a {
+    0%   { right: 9.9%; top: 5%; }
+    50%  { right: 10%;  top: 4.75%; }
+    100% { right: 9.9%; top: 5%; }
+}
+@keyframes whatsup-b {
+    0%   { right: 10%;   top: 4.5%; }
+    50%  { right: 9.75%; top: 5.25%; }
+    100% { right: 10%;   top: 4.5%; }
+}

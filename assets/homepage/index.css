@@ -6,7 +6,7 @@ body {
 
 #fog {
     position: absolute;
-	background: url("ominous-clouds.png") repeat;
+	background: url("../404/ominous-fog.png") repeat;
     opacity: 50%;
     background-size: 1024px;
     image-rendering: pixelated;

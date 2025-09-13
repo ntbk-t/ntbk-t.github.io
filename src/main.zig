@@ -1,27 +1,43 @@
 const std = @import("std");
-const ntbk_t_github_io = @import("ntbk_t_github_io");
+const fs = std.fs;
 
 pub fn main() !void {
-    // Prints to stderr, ignoring potential errors.
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
-    try ntbk_t_github_io.bufferedPrint();
+    const cwd = fs.cwd();
+    var assets = try cwd.openDir("assets", .{});
+    defer assets.close();
+
+    try cwd.deleteTree("site");
+    var site = try cwd.makeOpenPath("site", .{});
+    defer site.close();
+
+    try commonFiles(assets, site);
+    try makeHomepage(assets, site);
+    try make404(assets, site);
 }
 
-test "simple test" {
-    const gpa = std.testing.allocator;
-    var list: std.ArrayList(i32) = .empty;
-    defer list.deinit(gpa); // Try commenting this out and see if zig detects the memory leak!
-    try list.append(gpa, 42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
+fn commonFiles(assets: fs.Dir, site: fs.Dir) !void {
+    try assets.copyFile("default.ico", site, "default.ico", .{});
+    try assets.copyFile("CNAME", site, "CNAME", .{});
 }
 
-test "fuzz example" {
-    const Context = struct {
-        fn testOne(context: @This(), input: []const u8) anyerror!void {
-            _ = context;
-            // Try passing `--fuzz` to `zig build test` and see if it manages to fail this test case!
-            try std.testing.expect(!std.mem.eql(u8, "canyoufindme", input));
-        }
-    };
-    try std.testing.fuzz(Context{}, Context.testOne, .{});
+fn makeHomepage(assets: fs.Dir, site: fs.Dir) !void {
+    var assets_homepage = try assets.openDir("homepage", .{});
+    defer assets_homepage.close();
+    var site_homepage = try site.makeOpenPath("homepage", .{});
+    defer site_homepage.close();
+
+    try assets_homepage.copyFile("index.html", site, "index.html", .{});
+    try assets_homepage.copyFile("avatar.png", site_homepage, "avatar.png", .{});
+    try assets_homepage.copyFile("cool-grid.png", site_homepage, "cool-grid.png", .{});
+    try assets_homepage.copyFile("index.css", site_homepage, "index.css", .{});
+}
+
+fn make404(assets: fs.Dir, site: fs.Dir) !void {
+    var assets_404 = try assets.openDir("404", .{});
+    defer assets_404.close();
+    var site_404 = try site.makeOpenPath("404", .{});
+    defer site_404.close();
+
+    try assets_404.copyFile("index.html", site_404, "index.html", .{});
+    try assets_404.copyFile("ominous-fog.png", site_404, "ominous-fog.png", .{});
 }
